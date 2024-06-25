@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import "package:flutter_dotenv/flutter_dotenv.dart";
+import 'package:flutter_gemini/flutter_gemini.dart';
 
-void main() {
+Future main() async {
+  await dotenv.load(fileName: ".env");
+  Gemini.init(apiKey: dotenv.env['API_KEY'] as String);
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -56,10 +59,20 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final gemini = Gemini.instance;
 
   void _incrementCounter() {
     setState(() {
       _counter++;
+    });
+  }
+
+  void streamGenerateContent() {
+    print("Running streamGenerateContent");
+    gemini.streamGenerateContent("Hello there").listen((value) {
+      print(value.output);
+    }).onError((e) {
+      print('streamGenerateContent exception');
     });
   }
 
@@ -70,17 +83,19 @@ class _MyHomePageState extends State<MyHomePage> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
           title: Text(widget.title),
         ),
-        body: const Center(
+        body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
                 'Inimeg The Sage!!',
               ),
+              ElevatedButton(
+                onPressed: streamGenerateContent,
+                child: const Text('Generate Content'),
+              ),
             ],
           ),
-        )
-    );
+        ));
   }
 }
-
