@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:inimeg_the_sage/screens/story.dart';
@@ -6,7 +7,6 @@ import 'package:inimeg_the_sage/screens/story.dart';
 Future main() async {
   await dotenv.load(fileName: ".env");
   String geminiApiKey = dotenv.env["GEMINI_API_KEY"] as String;
-  // Gemini.init(apiKey: "AIzaSyDiSCoD0eIMBA96TPxlgANdzzKo1JHX86s");
   Gemini.init(apiKey: geminiApiKey);
   runApp(const MyApp());
 }
@@ -15,6 +15,11 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
+    // Set landscape orientation
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
     return MaterialApp(
       title: 'Inimeg the Sage',
       theme: ThemeData(
