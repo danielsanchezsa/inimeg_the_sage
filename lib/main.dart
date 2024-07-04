@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:inimeg_the_sage/screens/story.dart';
+import 'package:inimeg_the_sage/screens/themes.dart';
 
 Future main() async {
   await dotenv.load(fileName: ".env");
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
       initialRoute: "/",
       routes: {
         "/": (context) => const MyHomePage(title: 'Inimeg The Sage!!!'),
+        "/themes": (context) => Themes(),
         "/story": (context) => const Story(),
       },
     );
@@ -61,9 +63,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, "/story");
+                  Navigator.pushNamed(context, "/themes");
                 },
-                child: const Text('Go to Story'),
+                child: const Text('Choose a story theme!'),
               ),
             ],
           ),
