@@ -31,7 +31,9 @@ class MyApp extends StatelessWidget {
       routes: {
         "/": (context) => const MyHomePage(title: 'Inimeg The Sage!!!'),
         "/themes": (context) => Themes(),
-        "/story": (context) => const Story(),
+        "/story": (context) => const Story(
+              theme: "space",
+            ),
       },
     );
   }

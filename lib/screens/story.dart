@@ -4,13 +4,10 @@ import 'package:flutter_gemini/flutter_gemini.dart';
 import 'dart:convert';
 
 class Story extends StatefulWidget {
-  const Story({super.key});
+  final String theme;
+  const Story({super.key, required this.theme});
 
   // TODO (1): Pasar el argumento de la pantalla de temas para ponerlo en las instrucciones
-
-  /// System instructions for the model to initiate the story.
-  final String kSystemInstructions =
-      "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. The theme of the story should be \"space\". \nRespond in a JSON format only, with two keys: \"story\" and \"choices\", where \"story\" simply stores the string with the story text, so whatever you are telling the user, and \"choices\" contains keys \"text\" and \"id\", so that I can parse this JSON in my code and render the story choices as buttons.";
 
   @override
   State<Story> createState() => _StoryState();
@@ -24,7 +21,11 @@ class _StoryState extends State<Story> {
   String storyText = "";
 
   void streamGenerateContent() {
-    gemini.streamGenerateContent(widget.kSystemInstructions).listen((value) {
+    /// System instructions for the model to initiate the story.
+    String kSystemInstructions =
+        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. The theme of the story should be \"${widget.theme}\". \nRespond in a JSON format only, with two keys: \"story\" and \"choices\", where \"story\" simply stores the string with the story text, so whatever you are telling the user, and \"choices\" contains keys \"text\" and \"id\", so that I can parse this JSON in my code and render the story choices as buttons.";
+
+    gemini.streamGenerateContent(kSystemInstructions).listen((value) {
       updateText(value.output as String);
     }).onError((e) {
       updateText("Error: $e");

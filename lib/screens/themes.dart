@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inimeg_the_sage/screens/story.dart';
 
 /// Temporary screen that shows themes to pass as a prop to the Story screen
 class Themes extends StatelessWidget {
@@ -26,9 +27,11 @@ class Themes extends StatelessWidget {
           children: themes.map((theme) {
             return ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, "/story", arguments: {
-                  "theme": theme["key"] as String,
-                });
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            Story(theme: theme["key"] as String)));
               },
               child: Text(theme["name"] as String),
             );
