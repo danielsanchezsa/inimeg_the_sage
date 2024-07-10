@@ -1,4 +1,3 @@
-// Story Screen while I develop the connection to the Gemini API
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'dart:convert';
@@ -7,43 +6,40 @@ class Story extends StatefulWidget {
   final String theme;
   const Story({super.key, required this.theme});
 
-  // TODO (1): Pasar el argumento de la pantalla de temas para ponerlo en las instrucciones
-
   @override
   State<Story> createState() => _StoryState();
 }
 
 class _StoryState extends State<Story> {
   final gemini = Gemini.instance;
-  final List<Text> _responses = [];
   String rawResponse = "";
   final List<String> _choices = [];
   String storyText = "";
+  bool isLoading = false;
+  final List<Content> conversationHistory = [];
 
-  void streamGenerateContent() {
-    /// System instructions for the model to initiate the story.
-    String kSystemInstructions =
-        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. The theme of the story should be \"${widget.theme}\". \nRespond in a JSON format only, with two keys: \"story\" and \"choices\", where \"story\" simply stores the string with the story text, so whatever you are telling the user, and \"choices\" contains keys \"text\" and \"id\", so that I can parse this JSON in my code and render the story choices as buttons.";
+  void streamGenerateContent(List<Content> conversation) {
+    setState(() {
+      isLoading = true;
+    });
 
-    gemini.streamGenerateContent(kSystemInstructions).listen((value) {
-      updateText(value.output as String);
-    }).onError((e) {
+    gemini.chat(conversation).then((value) {
+      print(value?.output);
+      updateText(value?.output ?? 'No output');
+    }).catchError((e) {
       updateText("Error: $e");
     });
   }
 
   void updateText(String text) {
-    // No es óptimo, pero es suficiente para este ejemplo
-    // TODO (2): Mejorar el manejo de la respuesta de gemini para limpiar JSON, ejecutar la limpieza solo una vez
-    if (text.contains("```json")) {
-      text = text.replaceAll("```json", "");
-    } else if (text.contains("```")) {
-      text = text.replaceAll("```", "");
+    rawResponse += text;
+    if (isResponseComplete(rawResponse)) {
+      parseJSON();
     }
-    setState(() {
-      _responses.add(Text(text));
-      rawResponse += text;
-    });
+  }
+
+  bool isResponseComplete(String response) {
+    return response.trim().endsWith('}');
   }
 
   void parseJSON() {
@@ -52,58 +48,93 @@ class _StoryState extends State<Story> {
           jsonDecode(rawResponse) as Map<String, dynamic>;
       final String story = response["story"] as String;
       final List<dynamic> choices = response["choices"] as List<dynamic>;
-      for (var choice in choices) {
-        setState(() {
-          _choices.add(choice["text"] as String);
-        });
-      }
       setState(() {
+        _choices.clear();
+        for (var choice in choices) {
+          _choices.add(choice["text"] as String);
+        }
         storyText = story;
+        isLoading = false;
       });
     }
   }
 
+  void selectChoice(String choice) {
+    rawResponse = "";
+    // Update conversation history with user's choice
+    conversationHistory
+        .add(Content(parts: [Parts(text: choice)], role: 'user'));
+
+    // Prepare new instructions for the model
+    List<Content> conversation = List.from(conversationHistory);
+    conversation.add(Content(parts: [
+      Parts(
+          text:
+              "Continue the story based on the choice: \"$choice\". Remember to provide three choices for the next step.")
+    ], role: 'model'));
+
+    streamGenerateContent(conversation);
+  }
+
   @override
   void initState() {
-    streamGenerateContent();
     super.initState();
+    // Initial instructions for the story
+    String initialPrompt =
+        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with two keys: \"story\" and \"choices\", where \"story\" stores the string with the story text, and \"choices\" contains keys \"text\" and \"id\".";
+
+    conversationHistory
+        .add(Content(parts: [Parts(text: initialPrompt)], role: 'user'));
+    streamGenerateContent(conversationHistory);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Center(
-      child: ListView(
-        children: [
-          ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Back")),
-          ElevatedButton(
-              onPressed: () => print(rawResponse),
-              child: const Text("Print Raw Response")),
-          ElevatedButton(onPressed: parseJSON, child: const Text("Parse JSON")),
-          const Text("Story"),
-          _responses.isEmpty
-              ? const CircularProgressIndicator()
-              : storyText.isNotEmpty
-                  ? Text(storyText)
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: ListView(
+            children: [
+              SizedBox(
+                width: 200.0,
+                child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Back")),
+              ),
+              isLoading
+                  ? const Padding(
+                      padding: EdgeInsets.all(15.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    )
+                  : storyText.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(100.0),
+                          child: Text(
+                            storyText,
+                            style: const TextStyle(fontSize: 20),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : const Text("Loading..."),
+              _choices.isEmpty
+                  ? const SizedBox()
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      children: _responses,
+                      children: _choices
+                          .map((choice) => Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: ElevatedButton(
+                                  onPressed: () => selectChoice(choice),
+                                  child: Text(choice),
+                                ),
+                              ))
+                          .toList(),
                     ),
-          _choices.isEmpty
-              ? const Text("Choices")
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: _choices
-                      .map((choice) => ElevatedButton(
-                            onPressed: () => print(choice),
-                            child: Text(choice),
-                          ))
-                      .toList(),
-                ),
-        ],
+            ],
+          ),
+        ),
       ),
-    ));
+    );
   }
 }

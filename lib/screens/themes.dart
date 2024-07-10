@@ -14,6 +14,33 @@ class Themes extends StatelessWidget {
     {"name": "Mystery", "key": "mystery"},
     {"name": "Romance", "key": "romance"},
     {"name": "Comedy", "key": "comedy"},
+    {"name": "Superhero", "key": "superhero"},
+    {"name": "Western", "key": "western"},
+    {"name": "Cyberpunk", "key": "cyberpunk"},
+    {"name": "Post-apocalyptic", "key": "post-apocalyptic"},
+    {"name": "Historical", "key": "historical"},
+    {"name": "Steampunk", "key": "steampunk"},
+    {"name": "Pirate", "key": "pirate"},
+    {"name": "Fairytale", "key": "fairytale"},
+    {"name": "Dystopian", "key": "dystopian"},
+    {"name": "Detective", "key": "detective"},
+    {"name": "Thriller", "key": "thriller"},
+    {"name": "Action", "key": "action"},
+    {"name": "Adventure", "key": "adventure"},
+    {"name": "Apocalyptic", "key": "apocalyptic"},
+    {"name": "Zombie", "key": "zombie"},
+    {"name": "Vampire", "key": "vampire"},
+    {"name": "Werewolf", "key": "werewolf"},
+    {"name": "Alien", "key": "alien"},
+    {"name": "Time travel", "key": "time-travel"},
+    {"name": "Alternate history", "key": "alternate-history"},
+    {"name": "Fairy", "key": "fairy"},
+    {"name": "Mythology", "key": "mythology"},
+    {"name": "Magic", "key": "magic"},
+    {"name": "Supernatural", "key": "supernatural"},
+    {"name": "Paranormal", "key": "paranormal"},
+    {"name": "Urban fantasy", "key": "urban-fantasy"},
+    {"name": "Epic fantasy", "key": "epic-fantasy"},
   ];
 
   @override
@@ -23,17 +50,20 @@ class Themes extends StatelessWidget {
         title: const Text("Themes"),
       ),
       body: Center(
-        child: Column(
+        child: ListView(
           children: themes.map((theme) {
-            return ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            Story(theme: theme["key"] as String)));
-              },
-              child: Text(theme["name"] as String),
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              Story(theme: theme["key"] as String)));
+                },
+                child: Text(theme["name"] as String),
+              ),
             );
           }).toList(),
         ),
