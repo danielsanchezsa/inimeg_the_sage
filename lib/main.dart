@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import "package:flutter_dotenv/flutter_dotenv.dart";
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:inimeg_the_sage/screens/story.dart';
@@ -24,12 +25,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Inimeg the Sage',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.black, brightness: Brightness.dark)),
       initialRoute: "/",
       routes: {
-        "/": (context) => const MyHomePage(title: 'Inimeg The Sage!!!'),
+        "/": (context) => const MyHomePage(title: 'Inimeg The Sage'),
         "/themes": (context) => Themes(),
         "/story": (context) => const Story(
               theme: "space",
@@ -61,8 +62,18 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
-                'Inimeg The Sage!!',
+                'Inimeg The Sage',
+                style: TextStyle(fontSize: 30),
               ),
+              const SizedBox(height: 20),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  "Inimeg is a wise sage who loves to tell stories. Choose a theme for the story, and Inimeg will embark on a journey to tell you a story based on the theme you choose, while generating choices for you to make, and take the story in the direction you want.",
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pushNamed(context, "/themes");

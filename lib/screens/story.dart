@@ -24,7 +24,6 @@ class _StoryState extends State<Story> {
     });
 
     gemini.chat(conversation).then((value) {
-      print(value?.output);
       updateText(value?.output ?? 'No output');
     }).catchError((e) {
       updateText("Error: $e");
@@ -99,6 +98,11 @@ class _StoryState extends State<Story> {
                 child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Text("Back")),
+              ),
+              Text(
+                "Theme: ${widget.theme}",
+                style: const TextStyle(fontSize: 20),
+                textAlign: TextAlign.center,
               ),
               isLoading
                   ? const Padding(
