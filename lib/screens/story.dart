@@ -78,7 +78,7 @@ class _StoryState extends State<Story> {
     super.initState();
     // Initial instructions for the story
     String initialPrompt =
-        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with two keys: \"story\" and \"choices\", where \"story\" stores the string with the story text, and \"choices\" contains keys \"text\" and \"id\". Make every story to last for at least 10 turns, and make sure that the story is not repeating itself.";
+        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about 5 interactions. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with two keys: \"story\" and \"choices\", where \"story\" stores the string with the story text, and \"choices\" contains keys \"text\" and \"id\". Make every story to last for at least 10 turns, and make sure that the story is not repeating itself.";
 
     conversationHistory
         .add(Content(parts: [Parts(text: initialPrompt)], role: 'user'));
