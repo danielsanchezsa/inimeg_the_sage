@@ -9,15 +9,7 @@ class Themes extends StatelessWidget {
     {"name": "Space", "key": "space"},
     {"name": "Medieval", "key": "medieval"},
     {"name": "Fantasy", "key": "fantasy"},
-    {"name": "Sci-fi", "key": "sci-fi"},
-    {"name": "Horror", "key": "horror"},
     {"name": "Mystery", "key": "mystery"},
-    {"name": "Romance", "key": "romance"},
-    {"name": "Comedy", "key": "comedy"},
-    {"name": "Superhero", "key": "superhero"},
-    {"name": "Western", "key": "western"},
-    {"name": "Cyberpunk", "key": "cyberpunk"},
-    {"name": "Post-apocalyptic", "key": "post-apocalyptic"},
     {"name": "Historical", "key": "historical"},
     {"name": "Pirate", "key": "pirate"},
     {"name": "Fairytale", "key": "fairytale"},
@@ -32,12 +24,10 @@ class Themes extends StatelessWidget {
     {"name": "Alien", "key": "alien"},
     {"name": "Time travel", "key": "time-travel"},
     {"name": "Alternate history", "key": "alternate-history"},
-    {"name": "Fairy", "key": "fairy"},
     {"name": "Mythology", "key": "mythology"},
     {"name": "Magic", "key": "magic"},
     {"name": "Supernatural", "key": "supernatural"},
     {"name": "Paranormal", "key": "paranormal"},
-    {"name": "Urban fantasy", "key": "urban-fantasy"},
   ];
 
   @override

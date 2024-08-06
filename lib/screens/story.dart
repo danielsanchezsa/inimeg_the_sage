@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
 import 'dart:convert';
+import "package:flutter_dotenv/flutter_dotenv.dart";
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class Story extends StatefulWidget {
   final String theme;
@@ -11,22 +12,32 @@ class Story extends StatefulWidget {
 }
 
 class _StoryState extends State<Story> {
-  final gemini = Gemini.instance;
+  late GenerativeModel model;
+  late var chat;
   String rawResponse = "";
   final List<String> _choices = [];
   String storyText = "";
   bool isLoading = false;
   final List<Content> conversationHistory = [];
 
-  void streamGenerateContent(List<Content> conversation) {
-    setState(() {
-      isLoading = true;
-    });
+  void initializeModel() async {
+    await dotenv.load(fileName: ".env");
+    String geminiApiKey = dotenv.env["GEMINI_API_KEY"] as String;
+    // The Gemini 1.5 models are versatile and work with most use cases
+    model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: geminiApiKey);
+    // Initial instructions for the story
+    String initialPrompt =
+        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about 5 interactions. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with two keys: \"story\" and \"choices\", where \"story\" stores the string with the story text, and \"choices\" contains keys \"text\" and \"id\". Make every story to last for at least 10 turns, and make sure that the story is not repeating itself.";
+    chat = model.startChat(
+      history: [Content.text(initialPrompt)],
+    );
+    var response = await chat.sendMessage(Content.text(""));
+    updateText(response.text);
+  }
 
-    gemini.chat(conversation).then((value) {
-      updateText(value?.output ?? 'No output');
-    }).catchError((e) {
-      updateText("Error: $e");
+  void setLoading(bool loading) {
+    setState(() {
+      isLoading = loading;
     });
   }
 
@@ -58,31 +69,20 @@ class _StoryState extends State<Story> {
     }
   }
 
-  void selectChoice(String choice) {
+  void selectChoice(String choice) async {
+    setLoading(true);
     rawResponse = "";
     // Update conversation history with user's choice
-    conversationHistory
-        .add(Content(parts: [Parts(text: choice)], role: 'user'));
-
-    // Prepare new instructions for the model
-    List<Content> conversation = List.from(conversationHistory);
-    conversation.add(Content(parts: [
-      Parts(text: "Continue the story based on the choice: \"$choice\".")
-    ], role: 'user'));
-
-    streamGenerateContent(conversation);
+    var content = Content.text(choice);
+    var response = await chat.sendMessage(content);
+    updateText(response.text);
+    setLoading(false);
   }
 
   @override
   void initState() {
     super.initState();
-    // Initial instructions for the story
-    String initialPrompt =
-        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about 5 interactions. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with two keys: \"story\" and \"choices\", where \"story\" stores the string with the story text, and \"choices\" contains keys \"text\" and \"id\". Make every story to last for at least 10 turns, and make sure that the story is not repeating itself.";
-
-    conversationHistory
-        .add(Content(parts: [Parts(text: initialPrompt)], role: 'user'));
-    streamGenerateContent(conversationHistory);
+    initializeModel();
   }
 
   @override
