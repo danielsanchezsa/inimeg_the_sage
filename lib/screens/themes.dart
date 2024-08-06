@@ -19,7 +19,6 @@ class Themes extends StatelessWidget {
     {"name": "Cyberpunk", "key": "cyberpunk"},
     {"name": "Post-apocalyptic", "key": "post-apocalyptic"},
     {"name": "Historical", "key": "historical"},
-    {"name": "Steampunk", "key": "steampunk"},
     {"name": "Pirate", "key": "pirate"},
     {"name": "Fairytale", "key": "fairytale"},
     {"name": "Dystopian", "key": "dystopian"},
@@ -27,7 +26,6 @@ class Themes extends StatelessWidget {
     {"name": "Thriller", "key": "thriller"},
     {"name": "Action", "key": "action"},
     {"name": "Adventure", "key": "adventure"},
-    {"name": "Apocalyptic", "key": "apocalyptic"},
     {"name": "Zombie", "key": "zombie"},
     {"name": "Vampire", "key": "vampire"},
     {"name": "Werewolf", "key": "werewolf"},
@@ -40,33 +38,48 @@ class Themes extends StatelessWidget {
     {"name": "Supernatural", "key": "supernatural"},
     {"name": "Paranormal", "key": "paranormal"},
     {"name": "Urban fantasy", "key": "urban-fantasy"},
-    {"name": "Epic fantasy", "key": "epic-fantasy"},
   ];
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final buttonWidth = screenWidth * 0.3;
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Themes"),
       ),
       body: Center(
-        child: ListView(
-          children: themes.map((theme) {
+        child: ListView(children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            child: Text(
+              "Choose a theme for the story:",
+              textAlign: TextAlign.center,
+            ),
+          ),
+          ...themes.map((theme) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              Story(theme: theme["key"] as String)));
-                },
-                child: Text(theme["name"] as String),
+              child: SizedBox(
+                width: 2.0,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(buttonWidth, 50),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                Story(theme: theme["key"] as String)));
+                  },
+                  child: Text(theme["name"] as String),
+                ),
               ),
             );
-          }).toList(),
-        ),
+          })
+        ]),
       ),
     );
   }
