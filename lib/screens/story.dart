@@ -69,28 +69,28 @@ class _StoryState extends State<Story> {
   }
 
   void createImage(String prompt) async {
-    // final String apiKey = dotenv.env["OPENAI_API_KEY"] as String;
-    // const String url = "https://api.openai.com/v1/images/generations";
-    // final response = await http.post(
-    //   Uri.parse(url),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer $apiKey',
-    //   },
-    //   body: jsonEncode(
-    //       {"prompt": prompt, "n": 1, "size": "1792x1024", "model": "dall-e-3"}),
-    // );
+    final String apiKey = dotenv.env["OPENAI_API_KEY"] as String;
+    const String url = "https://api.openai.com/v1/images/generations";
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: jsonEncode(
+          {"prompt": prompt, "n": 1, "size": "1792x1024", "model": "dall-e-3"}),
+    );
 
-    // if (response.statusCode == 200) {
-    //   final Map<String, dynamic> data =
-    //       jsonDecode(response.body) as Map<String, dynamic>;
-    //   final imageURL = data["data"][0]["url"] as String;
-    //   setState(() {
-    //     _imageURL = imageURL;
-    //   });
-    // } else {
-    //   print("Failed to generate image: ${response.body}");
-    // }
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      final imageURL = data["data"][0]["url"] as String;
+      setState(() {
+        _imageURL = imageURL;
+      });
+    } else {
+      print("Failed to generate image: ${response.body}");
+    }
   }
 
   void selectChoice(String choice) async {

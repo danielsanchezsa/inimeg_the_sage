@@ -19,9 +19,6 @@ class Themes extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final buttonWidth = screenWidth * 0.9;
-
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -35,54 +32,54 @@ class Themes extends StatelessWidget {
                 final theme = themes[index];
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize:
-                          Size(buttonWidth, 200), // Adjust height as needed
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Story(
-                            theme: theme["name"] as String,
-                            color: theme["color"] as Color,
-                            themeKey: theme["key"] as String,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Stack(
-                      children: [
-                        ClipRRect(
+                  child: Center(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.0),
-                          child: Image.asset(
-                            'assets/images/inimeg_${theme["key"]}.png',
-                            height: 350,
-                            fit: BoxFit.cover,
-                          ),
                         ),
-                        Positioned(
-                          bottom: 10,
-                          left: 10,
-                          child: Container(
-                            color: Colors.black54,
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5.0, horizontal: 10.0),
-                            child: Text(
-                              theme["name"] as String,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                color: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Story(
+                              theme: theme["name"] as String,
+                              color: theme["color"] as Color,
+                              themeKey: theme["key"] as String,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(15.0),
+                            child: Image.asset(
+                              'assets/images/inimeg_${theme["key"]}.png',
+                              height: 350,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 10,
+                            left: 10,
+                            child: Container(
+                              color: Colors.black54,
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 5.0, horizontal: 10.0),
+                              child: Text(
+                                theme["name"] as String,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
