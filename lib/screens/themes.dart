@@ -41,7 +41,8 @@ class Themes extends StatelessWidget {
               child: GridView.count(
                 crossAxisCount: 3,
                 childAspectRatio: (buttonWidth / 80), // Adjust height as needed
-                padding: const EdgeInsets.all(8.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 38.0, vertical: 8.0),
                 children: themes.map((theme) {
                   return Padding(
                     padding: const EdgeInsets.all(8.0),

@@ -21,7 +21,6 @@ class _StoryState extends State<Story> {
   String storyText = "";
   bool isLoading = false;
   String imagePrompt = "";
-  bool _showImage = false; // Add this state variable
 
   void initializeModel() async {
     await dotenv.load(fileName: ".env");
@@ -81,50 +80,53 @@ class _StoryState extends State<Story> {
     initializeModel();
   }
 
-  void toggleImage() {
-    setState(() {
-      _showImage = !_showImage;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Inimeg The Sage @ ${widget.theme}"),
-        backgroundColor: widget.color,
-        foregroundColor:
-            widget.color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 30.0),
-          child: ListView(
-            children: [
-              isLoading
-                  ? Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Center(
-                          child: CircularProgressIndicator(
-                        color: widget.color,
-                      )),
-                    )
-                  : _showImage
-                      ? Expanded(
-                          child: Image.network(
-                            'https://picsum.photos/250?image=9',
-                            fit: BoxFit.cover,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: Text("Inimeg The Sage @ ${widget.theme}"),
+            backgroundColor: widget.color,
+            foregroundColor: widget.color.computeLuminance() > 0.5
+                ? Colors.black
+                : Colors.white,
+            floating: true,
+            snap: true,
+          ),
+          SliverList(
+            delegate: SliverChildListDelegate(
+              [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 30.0),
+                  child: isLoading
+                      ? Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: widget.color,
+                            ),
                           ),
                         )
                       : storyText.isNotEmpty
-                          ? Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 100.0, vertical: 30.0),
-                              child: Text(
-                                storyText,
-                                style: const TextStyle(fontSize: 20),
-                                textAlign: TextAlign.center,
-                              ),
+                          ? Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 100.0, vertical: 30.0),
+                                  child: Text(
+                                    storyText,
+                                    style: const TextStyle(fontSize: 20),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Image.network(
+                                  'https://picsum.photos/250?image=9',
+                                  fit: BoxFit.cover,
+                                  height: 400.0,
+                                ),
+                              ],
                             )
                           : Padding(
                               padding: const EdgeInsets.all(15.0),
@@ -133,44 +135,34 @@ class _StoryState extends State<Story> {
                                 color: widget.color,
                               )),
                             ),
-              _choices.isEmpty
-                  ? const SizedBox()
-                  : Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: _choices
-                          .map((choice) => Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    foregroundColor:
-                                        widget.color.computeLuminance() > 0.5
-                                            ? Colors.black
-                                            : Colors.white,
-                                    backgroundColor: widget.color,
-                                  ),
-                                  onPressed: () => selectChoice(choice),
-                                  child: Text(choice),
-                                ),
-                              ))
-                          .toList(),
-                    ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: Center(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: widget.color.computeLuminance() > 0.5
-                          ? widget.color
-                          : Colors.white,
-                    ),
-                    onPressed: toggleImage,
-                    child: Text(_showImage ? '💬 Show Text' : '📷 Show Image'),
-                  ),
                 ),
-              ),
-            ],
+                _choices.isEmpty
+                    ? const SizedBox()
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                            ..._choices.map((choice) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 10.0),
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      foregroundColor:
+                                          widget.color.computeLuminance() > 0.5
+                                              ? Colors.black
+                                              : Colors.white,
+                                      backgroundColor: widget.color,
+                                    ),
+                                    onPressed: () => selectChoice(choice),
+                                    child: Text(choice),
+                                  ),
+                                )),
+                            const SizedBox(
+                              height: 20.0,
+                            )
+                          ]),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
