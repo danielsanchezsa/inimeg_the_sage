@@ -57,6 +57,7 @@ class Themes extends StatelessWidget {
                             builder: (context) => Story(
                               theme: theme["name"] as String,
                               color: theme["color"] as Color,
+                              themeKey: theme["key"] as String,
                             ),
                           ),
                         );

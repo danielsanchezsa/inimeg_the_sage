@@ -6,9 +6,14 @@ import 'package:http/http.dart' as http;
 
 class Story extends StatefulWidget {
   final String theme;
+  final String themeKey;
   final Color color;
 
-  const Story({super.key, required this.theme, required this.color});
+  const Story(
+      {super.key,
+      required this.theme,
+      required this.color,
+      required this.themeKey});
 
   @override
   State<Story> createState() => _StoryState();
@@ -50,7 +55,6 @@ class _StoryState extends State<Story> {
     final Map<String, dynamic> response =
         jsonDecode(rawResponse) as Map<String, dynamic>;
     final String imagePrompt = response["imagePrompt"] as String;
-    print(imagePrompt);
     createImage(imagePrompt);
     final String story = response["story"] as String;
     final choices = response["choices"];
@@ -65,28 +69,28 @@ class _StoryState extends State<Story> {
   }
 
   void createImage(String prompt) async {
-    final String apiKey = dotenv.env["OPENAI_API_KEY"] as String;
-    const String url = "https://api.openai.com/v1/images/generations";
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $apiKey',
-      },
-      body: jsonEncode(
-          {"prompt": prompt, "n": 1, "size": "1792x1024", "model": "dall-e-3"}),
-    );
+    // final String apiKey = dotenv.env["OPENAI_API_KEY"] as String;
+    // const String url = "https://api.openai.com/v1/images/generations";
+    // final response = await http.post(
+    //   Uri.parse(url),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'Bearer $apiKey',
+    //   },
+    //   body: jsonEncode(
+    //       {"prompt": prompt, "n": 1, "size": "1792x1024", "model": "dall-e-3"}),
+    // );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data =
-          jsonDecode(response.body) as Map<String, dynamic>;
-      final imageURL = data["data"][0]["url"] as String;
-      setState(() {
-        _imageURL = imageURL;
-      });
-    } else {
-      print("Failed to generate image: ${response.body}");
-    }
+    // if (response.statusCode == 200) {
+    //   final Map<String, dynamic> data =
+    //       jsonDecode(response.body) as Map<String, dynamic>;
+    //   final imageURL = data["data"][0]["url"] as String;
+    //   setState(() {
+    //     _imageURL = imageURL;
+    //   });
+    // } else {
+    //   print("Failed to generate image: ${response.body}");
+    // }
   }
 
   void selectChoice(String choice) async {
@@ -128,12 +132,23 @@ class _StoryState extends State<Story> {
                   padding: const EdgeInsets.only(bottom: 30.0),
                   child: isLoading
                       ? Image.asset(
-                          "assets/images/INIMEG.png",
+                          "assets/images/inimeg_${widget.themeKey}.png",
                           height: 400.0,
                         )
                       : storyText.isNotEmpty
                           ? Column(
                               children: [
+                                const SizedBox(height: 10),
+                                _imageURL.isNotEmpty
+                                    ? Image.network(
+                                        _imageURL,
+                                        fit: BoxFit.cover,
+                                        height: 400.0,
+                                      )
+                                    : Image.asset(
+                                        "assets/images/inimeg_${widget.themeKey}.png",
+                                        height: 400.0,
+                                      ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 100.0, vertical: 30.0),
@@ -143,23 +158,18 @@ class _StoryState extends State<Story> {
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
-                                const SizedBox(height: 10),
-                                _imageURL.isNotEmpty
-                                    ? Image.network(
-                                        _imageURL,
-                                        fit: BoxFit.cover,
-                                        height: 400.0,
-                                      )
-                                    : Image.asset(
-                                        "assets/images/INIMEG.png",
-                                        height: 400.0,
-                                      ),
                               ],
                             )
-                          : Image.asset(
-                              "assets/images/INIMEG.png",
-                              height: 400.0,
-                            ),
+                          : _imageURL.isNotEmpty
+                              ? Image.network(
+                                  _imageURL,
+                                  fit: BoxFit.cover,
+                                  height: 400.0,
+                                )
+                              : Image.asset(
+                                  "assets/images/inimeg_${widget.themeKey}.png",
+                                  height: 400.0,
+                                ),
                 ),
                 _choices.isEmpty
                     ? const SizedBox()

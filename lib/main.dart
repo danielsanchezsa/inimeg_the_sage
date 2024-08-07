@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
     ]);
     return MaterialApp(
       title: 'Inimeg the Sage',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         "/story": (context) => const Story(
               theme: "space",
               color: Colors.blueGrey,
+              themeKey: "space",
             ),
       },
     );
@@ -49,11 +51,16 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: ListView(
         children: <Widget>[
+          Image.asset(
+            "assets/images/INIMEG.png",
+            height: 400.0,
+          ),
+          const SizedBox(height: 20),
           const Text(
             'Inimeg The Sage',
+            textAlign: TextAlign.center,
             style: TextStyle(fontSize: 30),
           ),
           const SizedBox(height: 20),
@@ -65,12 +72,15 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ),
           const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, "/themes");
-            },
-            child: const Text('Choose a story theme!'),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, "/themes");
+              },
+              child: const Text('Choose a story theme!'),
+            ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     ));
