@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:http/http.dart' as http;
 
 class Story extends StatefulWidget {
   final String theme;
@@ -20,7 +21,7 @@ class _StoryState extends State<Story> {
   final List<String> _choices = [];
   String storyText = "";
   bool isLoading = false;
-  String imagePrompt = "";
+  String _imageURL = "";
 
   void initializeModel() async {
     await dotenv.load(fileName: ".env");
@@ -48,18 +49,44 @@ class _StoryState extends State<Story> {
   void parseJSON() {
     final Map<String, dynamic> response =
         jsonDecode(rawResponse) as Map<String, dynamic>;
+    final String imagePrompt = response["imagePrompt"] as String;
+    print(imagePrompt);
+    createImage(imagePrompt);
     final String story = response["story"] as String;
     final choices = response["choices"];
-    final String imagePrompt = response["imagePrompt"] as String;
     setState(() {
       _choices.clear();
       for (String choice in choices) {
         _choices.add(choice);
       }
       storyText = story;
-      this.imagePrompt = imagePrompt;
       isLoading = false;
     });
+  }
+
+  void createImage(String prompt) async {
+    final String apiKey = dotenv.env["OPENAI_API_KEY"] as String;
+    const String url = "https://api.openai.com/v1/images/generations";
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $apiKey',
+      },
+      body: jsonEncode(
+          {"prompt": prompt, "n": 1, "size": "1792x1024", "model": "dall-e-3"}),
+    );
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      final imageURL = data["data"][0]["url"] as String;
+      setState(() {
+        _imageURL = imageURL;
+      });
+    } else {
+      print("Failed to generate image: ${response.body}");
+    }
   }
 
   void selectChoice(String choice) async {
@@ -100,13 +127,9 @@ class _StoryState extends State<Story> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 30.0),
                   child: isLoading
-                      ? Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: widget.color,
-                            ),
-                          ),
+                      ? Image.asset(
+                          "assets/images/INIMEG.png",
+                          height: 400.0,
                         )
                       : storyText.isNotEmpty
                           ? Column(
@@ -121,19 +144,21 @@ class _StoryState extends State<Story> {
                                   ),
                                 ),
                                 const SizedBox(height: 10),
-                                Image.network(
-                                  'https://picsum.photos/250?image=9',
-                                  fit: BoxFit.cover,
-                                  height: 400.0,
-                                ),
+                                _imageURL.isNotEmpty
+                                    ? Image.network(
+                                        _imageURL,
+                                        fit: BoxFit.cover,
+                                        height: 400.0,
+                                      )
+                                    : Image.asset(
+                                        "assets/images/INIMEG.png",
+                                        height: 400.0,
+                                      ),
                               ],
                             )
-                          : Padding(
-                              padding: const EdgeInsets.all(15.0),
-                              child: Center(
-                                  child: CircularProgressIndicator(
-                                color: widget.color,
-                              )),
+                          : Image.asset(
+                              "assets/images/INIMEG.png",
+                              height: 400.0,
                             ),
                 ),
                 _choices.isEmpty
