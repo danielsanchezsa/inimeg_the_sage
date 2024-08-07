@@ -21,13 +21,13 @@ class _StoryState extends State<Story> {
   String storyText = "";
   bool isLoading = false;
   String imagePrompt = "";
+  bool _showImage = false; // Add this state variable
 
   void initializeModel() async {
     await dotenv.load(fileName: ".env");
     String geminiApiKey = dotenv.env["GEMINI_API_KEY"] as String;
     model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: geminiApiKey);
     int interactions = 5;
-// TODO: implementar conexión de imagen
     String initialPrompt =
         "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about $interactions interactions. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with three keys: \"story\", \"choices\", and \"imagePrompt\"; where \"story\" stores the string with the story text, \"choices\" contains an array of the choices as strings, and \"imagePrompt\" that is a prompt to generate an image. Make sure that the story is not repeating itself.";
     chat = model.startChat(
@@ -50,7 +50,7 @@ class _StoryState extends State<Story> {
     final Map<String, dynamic> response =
         jsonDecode(rawResponse) as Map<String, dynamic>;
     final String story = response["story"] as String;
-    final choices = response["choices"]; // NO PONER EXPLICIT TYPE PORQUE TRUENA
+    final choices = response["choices"];
     final String imagePrompt = response["imagePrompt"] as String;
     setState(() {
       _choices.clear();
@@ -61,7 +61,6 @@ class _StoryState extends State<Story> {
       this.imagePrompt = imagePrompt;
       isLoading = false;
     });
-    print(imagePrompt);
   }
 
   void selectChoice(String choice) async {
@@ -80,6 +79,12 @@ class _StoryState extends State<Story> {
   void initState() {
     super.initState();
     initializeModel();
+  }
+
+  void toggleImage() {
+    setState(() {
+      _showImage = !_showImage;
+    });
   }
 
   @override
@@ -104,23 +109,30 @@ class _StoryState extends State<Story> {
                         color: widget.color,
                       )),
                     )
-                  : storyText.isNotEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 100.0, vertical: 30.0),
-                          child: Text(
-                            storyText,
-                            style: const TextStyle(fontSize: 20),
-                            textAlign: TextAlign.center,
+                  : _showImage
+                      ? Expanded(
+                          child: Image.network(
+                            'https://picsum.photos/250?image=9',
+                            fit: BoxFit.cover,
                           ),
                         )
-                      : Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Center(
-                              child: CircularProgressIndicator(
-                            color: widget.color,
-                          )),
-                        ),
+                      : storyText.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 100.0, vertical: 30.0),
+                              child: Text(
+                                storyText,
+                                style: const TextStyle(fontSize: 20),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : Padding(
+                              padding: const EdgeInsets.all(15.0),
+                              child: Center(
+                                  child: CircularProgressIndicator(
+                                color: widget.color,
+                              )),
+                            ),
               _choices.isEmpty
                   ? const SizedBox()
                   : Column(
@@ -142,6 +154,20 @@ class _StoryState extends State<Story> {
                               ))
                           .toList(),
                     ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: widget.color.computeLuminance() > 0.5
+                          ? widget.color
+                          : Colors.white,
+                    ),
+                    onPressed: toggleImage,
+                    child: Text(_showImage ? '💬 Show Text' : '📷 Show Image'),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
