@@ -117,10 +117,9 @@ class _StoryState extends State<Story> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: Text("Inimeg The Sage @ ${widget.theme}"),
-            backgroundColor: widget.color,
+            title: Text("${widget.theme} story by Inimeg"),
             foregroundColor: widget.color.computeLuminance() > 0.5
-                ? Colors.black
+                ? widget.color
                 : Colors.white,
             floating: true,
             snap: true,
@@ -131,10 +130,16 @@ class _StoryState extends State<Story> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 30.0),
                   child: isLoading
-                      ? Image.asset(
-                          "assets/images/inimeg_${widget.themeKey}.png",
-                          height: 400.0,
-                        )
+                      ? _imageURL.isNotEmpty
+                          ? Image.network(
+                              _imageURL,
+                              fit: BoxFit.cover,
+                              height: 400.0,
+                            )
+                          : Image.asset(
+                              "assets/images/inimeg_${widget.themeKey}.png",
+                              height: 400.0,
+                            )
                       : storyText.isNotEmpty
                           ? Column(
                               children: [
@@ -160,16 +165,14 @@ class _StoryState extends State<Story> {
                                 ),
                               ],
                             )
-                          : _imageURL.isNotEmpty
-                              ? Image.network(
-                                  _imageURL,
-                                  fit: BoxFit.cover,
-                                  height: 400.0,
-                                )
-                              : Image.asset(
-                                  "assets/images/inimeg_${widget.themeKey}.png",
-                                  height: 400.0,
+                          : Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(100.0),
+                                child: CircularProgressIndicator(
+                                  color: widget.color,
                                 ),
+                              ),
+                            ),
                 ),
                 _choices.isEmpty
                     ? const SizedBox()
