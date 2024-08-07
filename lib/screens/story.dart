@@ -20,21 +20,24 @@ class _StoryState extends State<Story> {
   final List<String> _choices = [];
   String storyText = "";
   bool isLoading = false;
-  final List<Content> conversationHistory = [];
+  String imagePrompt = "";
 
   void initializeModel() async {
     await dotenv.load(fileName: ".env");
     String geminiApiKey = dotenv.env["GEMINI_API_KEY"] as String;
     model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: geminiApiKey);
-
-// TODO: implementar que al final se genere una imagen con el texto de la historia
+    int interactions = 5;
+// TODO: implementar conexión de imagen
     String initialPrompt =
-        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about 7 interactions, and when it is done, return a single choice that says simply \"Reveal\" (this will be used to generate an image later on). The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with two keys: \"story\" and \"choices\", where \"story\" stores the string with the story text, and \"choices\" contains a single key \"text\". Make sure that the story is not repeating itself.";
+        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about $interactions interactions. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with three keys: \"story\", \"choices\", and \"imagePrompt\"; where \"story\" stores the string with the story text, \"choices\" contains an array of the choices as strings, and \"imagePrompt\" that is a prompt to generate an image. Make sure that the story is not repeating itself.";
     chat = model.startChat(
       history: [Content.text(initialPrompt)],
     );
     var response = await chat.sendMessage(Content.text(""));
-    updateText(response.text);
+    setState(() {
+      rawResponse = response.text as String;
+    });
+    parseJSON();
   }
 
   void setLoading(bool loading) {
@@ -43,33 +46,22 @@ class _StoryState extends State<Story> {
     });
   }
 
-// TODO: ver si con esta onda del nuevo librería ya no es necesario checkear si el response es completo
-  void updateText(String text) {
-    rawResponse += text;
-    if (isResponseComplete(rawResponse)) {
-      parseJSON();
-    }
-  }
-
-  bool isResponseComplete(String response) {
-    return response.trim().endsWith('}');
-  }
-
   void parseJSON() {
-    if (rawResponse.isNotEmpty) {
-      final Map<String, dynamic> response =
-          jsonDecode(rawResponse) as Map<String, dynamic>;
-      final String story = response["story"] as String;
-      final List<dynamic> choices = response["choices"] as List<dynamic>;
-      setState(() {
-        _choices.clear();
-        for (var choice in choices) {
-          _choices.add(choice["text"] as String);
-        }
-        storyText = story;
-        isLoading = false;
-      });
-    }
+    final Map<String, dynamic> response =
+        jsonDecode(rawResponse) as Map<String, dynamic>;
+    final String story = response["story"] as String;
+    final choices = response["choices"]; // NO PONER EXPLICIT TYPE PORQUE TRUENA
+    final String imagePrompt = response["imagePrompt"] as String;
+    setState(() {
+      _choices.clear();
+      for (String choice in choices) {
+        _choices.add(choice);
+      }
+      storyText = story;
+      this.imagePrompt = imagePrompt;
+      isLoading = false;
+    });
+    print(imagePrompt);
   }
 
   void selectChoice(String choice) async {
@@ -77,7 +69,10 @@ class _StoryState extends State<Story> {
     rawResponse = "";
     var content = Content.text(choice);
     var response = await chat.sendMessage(content);
-    updateText(response.text);
+    setState(() {
+      rawResponse = response.text;
+    });
+    parseJSON();
     setLoading(false);
   }
 
