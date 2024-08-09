@@ -25,8 +25,10 @@ class _StoryState extends State<Story> {
   String rawResponse = "";
   final List<String> _choices = [];
   String storyText = "";
-  bool isLoading = false;
-  String _imageURL = "";
+  String imageURL = "";
+  bool generatingStory = true;
+  bool generatingImage = true;
+  final ScrollController _scrollController = ScrollController();
 
   void initializeModel() async {
     await dotenv.load(fileName: ".env");
@@ -45,12 +47,6 @@ class _StoryState extends State<Story> {
     parseJSON();
   }
 
-  void setLoading(bool loading) {
-    setState(() {
-      isLoading = loading;
-    });
-  }
-
   void parseJSON() {
     final Map<String, dynamic> response =
         jsonDecode(rawResponse) as Map<String, dynamic>;
@@ -64,7 +60,7 @@ class _StoryState extends State<Story> {
         _choices.add(choice);
       }
       storyText = story;
-      isLoading = false;
+      generatingStory = false;
     });
   }
 
@@ -86,7 +82,8 @@ class _StoryState extends State<Story> {
           jsonDecode(response.body) as Map<String, dynamic>;
       final imageURL = data["data"][0]["url"] as String;
       setState(() {
-        _imageURL = imageURL;
+        this.imageURL = imageURL;
+        generatingImage = false;
       });
     } else {
       print("Failed to generate image: ${response.body}");
@@ -94,7 +91,15 @@ class _StoryState extends State<Story> {
   }
 
   void selectChoice(String choice) async {
-    setLoading(true);
+    _scrollController.animateTo(
+      50.0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+    setState(() {
+      generatingStory = true;
+      generatingImage = true;
+    });
     rawResponse = "";
     var content = Content.text(choice);
     var response = await chat.sendMessage(content);
@@ -102,7 +107,6 @@ class _StoryState extends State<Story> {
       rawResponse = response.text;
     });
     parseJSON();
-    setLoading(false);
   }
 
   @override
@@ -115,9 +119,13 @@ class _StoryState extends State<Story> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           SliverAppBar(
-            title: Text("${widget.theme} story by Inimeg"),
+            title: Text(
+              "${widget.theme} story by Inimeg",
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             foregroundColor: widget.color.computeLuminance() > 0.5
                 ? widget.color
                 : Colors.white,
@@ -129,50 +137,38 @@ class _StoryState extends State<Story> {
               [
                 Padding(
                   padding: const EdgeInsets.only(bottom: 30.0),
-                  child: isLoading
-                      ? _imageURL.isNotEmpty
-                          ? Image.network(
-                              _imageURL,
-                              fit: BoxFit.cover,
-                              height: 400.0,
-                            )
-                          : Image.asset(
-                              "assets/images/inimeg_${widget.themeKey}.png",
-                              height: 400.0,
-                            )
-                      : storyText.isNotEmpty
-                          ? Column(
-                              children: [
-                                const SizedBox(height: 10),
-                                _imageURL.isNotEmpty
-                                    ? Image.network(
-                                        _imageURL,
-                                        fit: BoxFit.cover,
-                                        height: 400.0,
-                                      )
-                                    : Image.asset(
-                                        "assets/images/inimeg_${widget.themeKey}.png",
-                                        height: 400.0,
-                                      ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 100.0, vertical: 30.0),
-                                  child: Text(
-                                    storyText,
-                                    style: const TextStyle(fontSize: 20),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(100.0),
-                                child: CircularProgressIndicator(
-                                  color: widget.color,
-                                ),
+                  child: Column(
+                    children: [
+                      Image.asset(
+                        "assets/images/inimeg_${widget.themeKey}.png",
+                        height: 400.0,
+                      ),
+                      const SizedBox(height: 10),
+                      storyText.isNotEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 100.0, vertical: 30.0),
+                              child: Text(
+                                storyText,
+                                style: const TextStyle(fontSize: 20),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
+                            )
+                          : const Text("Generating story..."),
+                      imageURL.isNotEmpty && generatingImage
+                          ? const Padding(
+                              padding: EdgeInsets.only(top: 8.0),
+                              child: Text("Generating next image..."),
+                            )
+                          : const SizedBox(),
+                      imageURL.isNotEmpty
+                          ? Image.network(
+                              imageURL,
+                              height: 400.0,
+                            )
+                          : const Text("Generating image..."),
+                    ],
+                  ),
                 ),
                 _choices.isEmpty
                     ? const SizedBox()

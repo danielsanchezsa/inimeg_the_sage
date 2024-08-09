@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
           const Text(
             'Inimeg The Sage',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 30),
+            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
           const Padding(

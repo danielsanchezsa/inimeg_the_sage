@@ -23,7 +23,10 @@ class Themes extends StatelessWidget {
       body: CustomScrollView(
         slivers: [
           const SliverAppBar(
-            title: Text('Select Theme'),
+            title: Text(
+              'Select Theme',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             floating: true,
           ),
           SliverList(
@@ -63,8 +66,8 @@ class Themes extends StatelessWidget {
                             ),
                           ),
                           Positioned(
-                            bottom: 10,
-                            left: 10,
+                            bottom: 15,
+                            right: 20,
                             child: Container(
                               color: Colors.black54,
                               padding: const EdgeInsets.symmetric(
@@ -72,9 +75,9 @@ class Themes extends StatelessWidget {
                               child: Text(
                                 theme["name"] as String,
                                 style: const TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                ),
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
