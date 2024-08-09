@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
               seedColor: Colors.blueGrey, brightness: Brightness.dark)),
       initialRoute: "/",
       routes: {
-        "/": (context) => const MyHomePage(title: 'Inimeg The Sage'),
+        "/": (context) => const MyHomePage(title: 'Inimeg the Sage'),
         "/themes": (context) => Themes(),
         "/story": (context) => const Story(
               theme: "space",

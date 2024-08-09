@@ -37,7 +37,7 @@ class _StoryState extends State<Story> {
     model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: geminiApiKey);
     int interactions = 5;
     String initialPrompt =
-        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about $interactions interactions. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with three keys: \"story\", \"choices\", and \"imagePrompt\"; where \"story\" stores the string with the story text, \"choices\" contains an array of the choices as strings, and \"imagePrompt\" that is a prompt to generate an image. Make sure that the story is not repeating itself.";
+        "Tell me a story in which I am the main character, and make it interactive, so that every time you tell me about the story you give me three choices that would lead me to different story outcomes. Make sure that the story only lasts for about $interactions interactions (choices) and that it always comes to an end, even if it has to be abrupt. The theme of the story should be \"${widget.theme}\". Respond in raw JSON only, so, start your response with \"{\" character and end it with \"}\", with three keys: \"story\", \"choices\", and \"imagePrompt\"; where \"story\" stores the string with the story text, \"choices\" contains an array of the choices as strings, and \"imagePrompt\" that is a prompt to generate an image. Make sure that the story is not repeating itself.";
     chat = model.startChat(
       history: [Content.text(initialPrompt)],
     );
@@ -101,7 +101,7 @@ class _StoryState extends State<Story> {
 
   void selectChoice(String choice) async {
     _scrollController.animateTo(
-      50.0,
+      120.0,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
@@ -153,6 +153,9 @@ class _StoryState extends State<Story> {
                         height: 400.0,
                       ),
                       const SizedBox(height: 10),
+                      generatingStory
+                          ? const Text("Generating story...")
+                          : const SizedBox(),
                       storyText.isNotEmpty
                           ? Padding(
                               padding: const EdgeInsets.symmetric(
@@ -163,7 +166,7 @@ class _StoryState extends State<Story> {
                                 textAlign: TextAlign.center,
                               ),
                             )
-                          : const Text("Generating story..."),
+                          : const SizedBox(),
                       imageURL.isNotEmpty && generatingImage
                           ? const Padding(
                               padding: EdgeInsets.only(bottom: 8.0),
