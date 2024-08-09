@@ -28,6 +28,7 @@ class _StoryState extends State<Story> {
   String imageURL = "";
   bool generatingStory = true;
   bool generatingImage = true;
+  bool imageError = false;
   final ScrollController _scrollController = ScrollController();
 
   void initializeModel() async {
@@ -65,6 +66,10 @@ class _StoryState extends State<Story> {
   }
 
   void createImage(String prompt) async {
+    setState(() {
+      generatingImage = true;
+      imageError = false;
+    });
     final String apiKey = dotenv.env["OPENAI_API_KEY"] as String;
     const String url = "https://api.openai.com/v1/images/generations";
     final response = await http.post(
@@ -87,6 +92,10 @@ class _StoryState extends State<Story> {
       });
     } else {
       print("Failed to generate image: ${response.body}");
+      setState(() {
+        generatingImage = false;
+        imageError = true;
+      });
     }
   }
 
@@ -157,8 +166,15 @@ class _StoryState extends State<Story> {
                           : const Text("Generating story..."),
                       imageURL.isNotEmpty && generatingImage
                           ? const Padding(
-                              padding: EdgeInsets.only(top: 8.0),
+                              padding: EdgeInsets.only(bottom: 8.0),
                               child: Text("Generating next image..."),
+                            )
+                          : const SizedBox(),
+                      imageError
+                          ? const Padding(
+                              padding: EdgeInsets.only(bottom: 8.0),
+                              child: Text(
+                                  "Failed to generate image, please proceed with the story."),
                             )
                           : const SizedBox(),
                       imageURL.isNotEmpty
